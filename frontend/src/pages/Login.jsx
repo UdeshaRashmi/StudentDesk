@@ -1,6 +1,7 @@
 import { useState } from "react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { login as apiLogin } from "../services/studentApi";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,30 +16,27 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Example: just log values for now
-      console.log({ email, password, rememberMe });
-
-      // TODO: Replace with real auth API
-      if (email === "user@example.com" && password === "123456") {
-        // Store login state
-        if (rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        }
-        // Set authenticated state and user info
+      const res = await apiLogin({ email, password });
+      if (res && res.data && res.data.success) {
+        const { token, user } = res.data;
+        const userData = {
+          ...user,
+          name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User')
+        };
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('isLoggedIn', 'true');
-        const user = { name: 'Demo User', email };
-        localStorage.setItem('user', JSON.stringify(user));
-
-        navigate("/dashboard");
+        if (rememberMe) localStorage.setItem('rememberMe', 'true');
+        else localStorage.removeItem('rememberMe');
+        navigate('/dashboard');
       } else {
-        alert("Invalid credentials. Try: user@example.com / 123456");
+        const msg = res?.data?.message || 'Invalid credentials';
+        alert(msg);
       }
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please try again.");
+      console.error("Login error:", error?.response || error);
+      const msg = error?.response?.data?.message || 'Login failed. Please try again.';
+      alert(msg);
     } finally {
       setIsLoading(false);
     }

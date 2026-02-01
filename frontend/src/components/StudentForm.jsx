@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
-import { addStudent, updateStudent } from "../services/studentApi";
+import { createStudent, updateStudent } from "../services/studentApi";
+ 
 
 export default function StudentForm({ refresh, selectedStudent, clearSelection }) {
   const [form, setForm] = useState({
@@ -28,13 +29,17 @@ export default function StudentForm({ refresh, selectedStudent, clearSelection }
         await updateStudent(selectedStudent._id, form);
         clearSelection();
       } else {
-        await addStudent(form);
+        await createStudent(form);
       }
 
       setForm({ name: "", email: "", course: "", age: "" });
       refresh();
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error submitting form:", error?.response || error);
+      const msg = error?.response?.data?.message || error?.response?.data?.errors || 'Failed to save student';
+      // Show the backend message to the user for easier debugging
+      if (typeof msg === 'string') alert(msg);
+      else alert(JSON.stringify(msg));
     } finally {
       setIsSubmitting(false);
     }

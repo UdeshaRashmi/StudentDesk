@@ -21,11 +21,11 @@ export default function Home() {
     setIsLoading(true);
     try {
       const res = await getStudents();
-      const data = res.data || [];
+      const data = (res && res.data && (Array.isArray(res.data) ? res.data : res.data.data)) || [];
       setStudents(data);
       
       // Calculate statistics
-      if (data.length > 0) {
+      if (Array.isArray(data) && data.length > 0) {
         const total = data.length;
         const averageAge = data.reduce((sum, student) => sum + parseInt(student.age || 0), 0) / total;
         const courses = data.reduce((acc, student) => {

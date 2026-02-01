@@ -23,7 +23,7 @@ export default function Dashboard() {
     setIsLoading(true);
     try {
       const res = await getStudents();
-      const data = res.data || [];
+      const data = (res && res.data && (Array.isArray(res.data) ? res.data : res.data.data)) || [];
       setStudents(data);
       
       // Calculate dashboard statistics
@@ -56,7 +56,9 @@ export default function Dashboard() {
   }, []);
 
   // Get course distribution
-  const courseDistribution = students.reduce((acc, student) => {
+  const list = Array.isArray(students) ? students : (students && Array.isArray(students.data) ? students.data : []);
+
+  const courseDistribution = list.reduce((acc, student) => {
     acc[student.course] = (acc[student.course] || 0) + 1;
     return acc;
   }, {});
@@ -67,14 +69,14 @@ export default function Dashboard() {
 
   // Get age groups
   const ageGroups = {
-    '16-20': students.filter(s => s.age >= 16 && s.age <= 20).length,
-    '21-25': students.filter(s => s.age >= 21 && s.age <= 25).length,
-    '26-30': students.filter(s => s.age >= 26 && s.age <= 30).length,
-    '31+': students.filter(s => s.age > 30).length
+    '16-20': list.filter(s => s.age >= 16 && s.age <= 20).length,
+    '21-25': list.filter(s => s.age >= 21 && s.age <= 25).length,
+    '26-30': list.filter(s => s.age >= 26 && s.age <= 30).length,
+    '31+': list.filter(s => s.age > 30).length
   };
 
   // Recent students
-  const recentStudents = students.slice(-5).reverse();
+  const recentStudents = list.slice(-5).reverse();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

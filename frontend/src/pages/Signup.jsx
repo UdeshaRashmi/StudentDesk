@@ -1,6 +1,7 @@
 import { useState } from "react";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { signup as apiSignup } from "../services/studentApi";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -73,17 +74,22 @@ export default function Signup() {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const res = await apiSignup({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      });
       
-      console.log("Signup data:", formData);
-      
-      // TODO: Replace with real API call
-      alert("Account created successfully!");
-      navigate("/login");
+      if (res && res.data && res.data.success) {
+        alert("Account created successfully!");
+        navigate("/login");
+      } else {
+        alert(res?.data?.message || "Signup failed");
+      }
     } catch (error) {
-      console.error("Signup error:", error);
-      alert("Signup failed. Please try again.");
+      console.error("Signup error:", error?.response || error);
+      alert(error?.response?.data?.message || "Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

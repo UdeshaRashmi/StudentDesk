@@ -4,6 +4,13 @@ import React, { useState } from "react";
 export default function StudentList({ students, refresh, setSelectedStudent }) {
   const [deletingId, setDeletingId] = useState(null);
 
+  // Ensure we always work with an array
+  const list = Array.isArray(students)
+    ? students
+    : (students && Array.isArray(students.data))
+      ? students.data
+      : [];
+
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this student? This action cannot be undone.")) {
       setDeletingId(id);
@@ -35,19 +42,19 @@ export default function StudentList({ students, refresh, setSelectedStudent }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Student Records</h2>
-          <p className="text-gray-600 text-sm mt-1">
-            {students.length} student{students.length !== 1 ? 's' : ''} found
-          </p>
+              <p className="text-gray-600 text-sm mt-1">
+                {list.length} student{list.length !== 1 ? 's' : ''} found
+              </p>
         </div>
         <div className="text-sm text-gray-500">
-          Total: <span className="font-semibold text-amber-600">{students.length}</span>
+          Total: <span className="font-semibold text-amber-600">{list.length}</span>
         </div>
       </div>
 
-      {students.length === 0 ? (
+      {list.length === 0 ? (
         <div className="text-center py-12">
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,7 +79,7 @@ export default function StudentList({ students, refresh, setSelectedStudent }) {
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
+              {list.map((student) => (
                 <tr 
                   key={student._id} 
                   className="border-b border-gray-100 hover:bg-amber-50/50 transition-colors"
@@ -160,23 +167,23 @@ export default function StudentList({ students, refresh, setSelectedStudent }) {
       )}
 
       {/* Summary Footer */}
-      {students.length > 0 && (
+      {list.length > 0 && (
         <div className="mt-6 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap items-center justify-between text-sm text-gray-600">
             <div className="flex items-center space-x-6">
               <div className="flex items-center">
                 <span className="w-3 h-3 rounded-full bg-blue-100 mr-2"></span>
-                <span>Computer Science: {students.filter(s => s.course === "Computer Science").length}</span>
+                <span>Computer Science: {list.filter(s => s.course === "Computer Science").length}</span>
               </div>
               <div className="flex items-center">
                 <span className="w-3 h-3 rounded-full bg-green-100 mr-2"></span>
-                <span>Business: {students.filter(s => s.course === "Business Administration").length}</span>
+                <span>Business: {list.filter(s => s.course === "Business Administration").length}</span>
               </div>
             </div>
             <div className="mt-2 sm:mt-0">
               <p className="text-gray-500">
                 Average age: <span className="font-semibold text-amber-600">
-                  {(students.reduce((sum, student) => sum + parseInt(student.age), 0) / students.length).toFixed(1)}
+                  {(list.reduce((sum, student) => sum + parseInt(student.age || 0), 0) / list.length).toFixed(1)}
                 </span>
               </p>
             </div>
